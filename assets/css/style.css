@@ -245,3 +245,200 @@ footer {
 		height: 40px;
 	}
 }
+/* ==========================================================================
+   CLOWN MODE / CHAOS EFFECTS
+   ========================================================================== */
+
+body.fx-3d { transform-style: preserve-3d; }
+html { perspective: 1200px; }
+
+body.fx-fire { background: radial-gradient(ellipse at bottom, #2a0500 0%, #0a0a0a 60%); }
+
+body.fx-invert { filter: invert(1) hue-rotate(180deg); }
+
+@keyframes shakeX {
+	0%,100% { transform: translate(0,0) rotate(0); }
+	10% { transform: translate(-6px,4px) rotate(-1deg); }
+	20% { transform: translate(6px,-4px) rotate(1deg); }
+	30% { transform: translate(-8px,-2px) rotate(2deg); }
+	40% { transform: translate(8px,2px) rotate(-2deg); }
+	50% { transform: translate(-6px,6px) rotate(1deg); }
+	60% { transform: translate(6px,-6px) rotate(-1deg); }
+	70% { transform: translate(-4px,-4px) rotate(2deg); }
+	80% { transform: translate(4px,4px) rotate(-2deg); }
+	90% { transform: translate(-2px,2px) rotate(1deg); }
+}
+body.fx-shake main { animation: shakeX .3s infinite; }
+
+@keyframes hueSpin { from { filter: hue-rotate(0); } to { filter: hue-rotate(360deg); } }
+body.fx-rainbow { animation: hueSpin 3s linear infinite; }
+
+@keyframes bounceLink {
+	0%,100% { transform: translateY(0); }
+	50% { transform: translateY(-18px) rotate(10deg); }
+}
+body.fx-bouncy .links a { animation: bounceLink .8s ease-in-out infinite; }
+body.fx-bouncy .links a:nth-child(2n) { animation-delay: .15s; }
+body.fx-bouncy .links a:nth-child(3n) { animation-delay: .3s; }
+
+@keyframes spinTitle { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+body.fx-spin-title main h1 { animation: spinTitle 3s linear infinite; display: inline-block; }
+
+body.fx-target #cursor .cursor__content { border-radius: 50%; background: transparent; border: 3px solid var(--second-color); }
+body.fx-target #cursor .cursor__content::after { content: ""; position: absolute; left: 50%; top: -12px; width: 2px; height: 24px; background: var(--second-color); transform: translateX(-50%); }
+body.fx-target #cursor .cursor__content::before { content: ""; position: absolute; top: 50%; left: -12px; width: 24px; height: 2px; background: var(--second-color); transform: translateY(-50%); }
+
+body.fx-gravity main { transform: translate(-50%,-50%) rotateX(70deg); }
+
+@keyframes zoomPulse { 0%,100% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-50%,-50%) scale(1.15); } }
+body.fx-zoom main { animation: zoomPulse 1.2s ease-in-out infinite; }
+
+body.fx-neon main h1 { text-shadow: 0 0 6px #0ff, 0 0 14px #0ff, 0 0 28px #0ff, 0 0 42px #f0f; }
+
+@keyframes waveSkew { 0%,100% { transform: translate(-50%,-50%) skewX(0); } 25% { transform: translate(-50%,-50%) skewX(6deg); } 75% { transform: translate(-50%,-50%) skewX(-6deg); } }
+body.fx-wave main { animation: waveSkew 2s ease-in-out infinite; }
+
+@keyframes strobeF { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+body.fx-strobe main { animation: strobeF .12s steps(2) infinite; }
+
+body.fx-letters main h1 span { display: inline-block; animation: flyLetter 3s ease-in-out infinite; animation-delay: calc(var(--i) * .05s); }
+@keyframes flyLetter {
+	0%,100% { transform: translate(0,0) rotate(0); }
+	25% { transform: translate(0,-20px) rotate(15deg); }
+	75% { transform: translate(0,10px) rotate(-10deg); }
+}
+
+@keyframes blackhole { 0% { transform: translate(-50%,-50%) scale(1) rotate(0); } 100% { transform: translate(-50%,-50%) scale(0.2) rotate(720deg); } }
+body.fx-blackhole main { animation: blackhole 3s ease-in infinite alternate; }
+
+body.fx-hearts .links a::after { content: "❤️"; position: absolute; font-size: 14px; top: -6px; right: -6px; }
+body.fx-hearts .links a { position: relative; }
+
+@keyframes drunk { 0% { transform: translate(-50%,-50%) scale(var(--scale)) rotate(0); } 25% { transform: translate(calc(-50% + 4px), calc(-50% - 3px)) scale(var(--scale)) rotate(5deg); } 50% { transform: translate(calc(-50% - 5px), calc(-50% + 4px)) scale(var(--scale)) rotate(-6deg); } 75% { transform: translate(calc(-50% + 3px), calc(-50% + 5px)) scale(var(--scale)) rotate(4deg); } 100% { transform: translate(-50%,-50%) scale(var(--scale)) rotate(0); } }
+body.fx-drunk #cursor { animation: drunk .3s infinite; }
+
+body.fx-mirror main { transform: translate(-50%,-50%) scaleX(-1); }
+
+body.fx-bounce main { animation: bounceMain 1s ease-in-out infinite; }
+@keyframes bounceMain { 0%,100% { transform: translate(-50%,-50%) translateY(0); } 50% { transform: translate(-50%,-50%) translateY(-30px); } }
+
+body.fx-sleepy { filter: blur(3px) brightness(.7); }
+
+body.fx-uwu main h1 { color: #ff8ad1; text-shadow: 0 0 10px #ff8ad1; }
+
+body.fx-vibe { animation: hueSpin .4s linear infinite; }
+
+@keyframes flyaway { 0% { transform: translate(0,0); opacity: 1; } 100% { transform: translate(40vw,-60vh) rotate(720deg); opacity: 0; } }
+main h1.fx-flyaway { animation: flyaway 2s ease-in forwards; }
+
+@keyframes oSpin { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
+a.fx-o { animation: oSpin .8s linear 3; }
+
+@keyframes destroy { 0% { filter: none; transform: scale(1); } 50% { filter: blur(10px); transform: scale(1.4); opacity: 0.2; } 100% { filter: none; transform: scale(1); opacity: 1; } }
+body.fx-destroy { animation: destroy 1.5s ease-in-out; }
+
+/* --- dynamic layers --- */
+
+#party-layer { position: fixed; inset: 0; pointer-events: none; z-index: 9999; overflow: hidden; }
+
+.faller, .faller-confetti { position: fixed; top: -12vh; z-index: 9998; pointer-events: none; animation-name: fallDown; animation-timing-function: linear; animation-fill-mode: forwards; }
+@keyframes fallDown { to { transform: translateY(125vh) rotate(720deg); opacity: 0; } }
+.faller-confetti { animation-timing-function: ease-in; }
+@keyframes confettiWiggle { 0% { transform: translateY(0) rotate(0); } 100% { transform: translateY(120vh) rotate(1080deg); opacity: 0; } }
+
+.paint-dot { position: fixed; width: 14px; height: 14px; border-radius: 50%; z-index: 9997; pointer-events: none; transform: translate(-50%,-50%); animation: paintFade 1.2s ease-out forwards; }
+@keyframes paintFade { to { opacity: 0; transform: translate(-50%,-50%) scale(2.5); } }
+
+#emoji-cursor { position: fixed; top: 0; left: 0; font-size: 30px; z-index: 10006; pointer-events: none; will-change: transform; }
+
+#matrix { position: fixed; inset: 0; z-index: 9996; pointer-events: none; opacity: .3; }
+
+.chaos-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 40px; font-family: 'VK Sans Display', sans-serif; z-index: 10002; animation: popIn 2.5s ease forwards; pointer-events: none; }
+@keyframes popIn { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.5); } 15% { opacity: 1; transform: translate(-50%,-50%) scale(1.2); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%,-60%) scale(1); } }
+
+#meme, #rick { position: fixed; top: 20%; left: 50%; transform: translateX(-50%); font-size: 34px; z-index: 10003; animation: popIn 3s ease forwards; pointer-events: none; }
+
+.corner-emoji { position: fixed; top: 4px; left: 4px; font-size: 26px; z-index: 10003; animation: popIn 1.2s ease forwards; pointer-events: none; }
+
+body.fx-snow::after { content: ""; position: fixed; inset: 0; pointer-events: none; background: rgba(255,255,255,.12); mix-blend-mode: screen; }
+
+#clown-kill {
+	position: fixed;
+	bottom: 8px;
+	right: 8px;
+	z-index: 10004;
+	font-size: 20px;
+	line-height: 1;
+	padding: 8px 10px;
+	border: none;
+	border-radius: 10px;
+	background: var(--second-color);
+	color: var(--first-color);
+	cursor: pointer;
+	opacity: .6;
+}
+#clown-kill:hover { opacity: 1; }
+
+#clown-hints {
+	position: fixed;
+	bottom: 8px;
+	right: 56px;
+	z-index: 10004;
+	font-size: 20px;
+	line-height: 1;
+	padding: 8px 10px;
+	border: none;
+	border-radius: 10px;
+	background: var(--second-color);
+	color: var(--first-color);
+	cursor: pointer;
+	opacity: .6;
+}
+#clown-hints:hover { opacity: 1; }
+
+#hints-panel {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 10005;
+	width: min(560px, 90vw);
+	max-height: 80vh;
+	overflow: auto;
+	background: var(--first-color);
+	color: var(--second-color);
+	border: 2px solid var(--second-color);
+	border-radius: 14px;
+	padding: 14px 18px;
+	box-shadow: 0 12px 40px rgba(0,0,0,.4);
+	display: none;
+}
+#hints-panel.open { display: block; }
+#hints-panel .hints-head {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-family: 'VK Sans Display', sans-serif;
+	font-size: 22px;
+	margin-bottom: 10px;
+}
+#hints-panel .hints-head span { font-size: 13px; opacity: .6; }
+#hints-panel .hints-head button {
+	margin-left: auto;
+	border: none;
+	background: var(--second-color);
+	color: var(--first-color);
+	border-radius: 8px;
+	width: 30px;
+	height: 30px;
+	cursor: pointer;
+	font-size: 15px;
+}
+#hints-panel ul { margin: 0; padding: 0; list-style: none; }
+#hints-panel li {
+	padding: 7px 0;
+	border-bottom: 1px solid color-mix(in srgb, var(--second-color) 20%, transparent);
+	font-size: 13pt;
+}
+#hints-panel li:last-child { border-bottom: none; }
+#hints-panel li b { font-family: 'VK Sans Display', sans-serif; }

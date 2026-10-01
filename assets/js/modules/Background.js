@@ -4,14 +4,19 @@ import { getTheme } from "./Theme.js";
 const logger = new Logger("Background");
 
 let SNOW_MODE = false;
+let FIRE_TRAIL = true;
+let FIRE = true;
+let SPEED = 1;
 
 const STAR_COUNT = (window.innerWidth + window.innerHeight) / 8,
 		STAR_SIZE = 3,
 		SNOW_SIZE = 5,
 		STAR_MIN_SCALE = 0.2,
-		OVERFLOW_THRESHOLD = 50;
+		OVERFLOW_THRESHOLD = 50,
+		EMBER_COUNT = 140;
 
 const stars = [];
+const embers = [];
 
 const pointer = {x: 0, y: 0, startX: 0, startY: 0}
 
@@ -19,6 +24,7 @@ const velocity = { x: 0, y: 0, tx: 0, ty: 0, z: 0.0005 };
 let gyroscopeInput = false;
 
 let canvas, context, width, height, scale = 1;
+let time = 0;
 
 function generate() {
 	for(let i = 0; i < STAR_COUNT; i++) {
@@ -26,7 +32,7 @@ function generate() {
 			x: 0,
 			y: 0,
 			z: STAR_MIN_SCALE + Math.random() * (1 - STAR_MIN_SCALE),
-			alpha: Math.random()
+			twinkle: Math.random() * Math.PI * 2
 		});
 	 }
 }
@@ -59,7 +65,7 @@ function recycleStar(star) {
 	}
 	
 	star.z = STAR_MIN_SCALE + Math.random() * (1 - STAR_MIN_SCALE);
-	star.alpha = Math.random();
+	star.twinkle = Math.random() * Math.PI * 2;
 
 	switch(direction) {
 		case "z":
@@ -86,6 +92,54 @@ function recycleStar(star) {
 	}
 }
 
+function spawnEmber() {
+	embers.push({
+		x: Math.random() * width,
+		y: height + Math.random() * 40,
+		vx: (Math.random() - 0.5) * 0.8,
+		vy: -(0.5 + Math.random() * 2.5),
+		size: 2 + Math.random() * 8,
+		life: Math.random(),
+		hue: 15 + Math.random() * 45
+	});
+}
+
+function updateEmbers() {
+	if (!FIRE) {
+		embers.length = 0;
+		return;
+	}
+	while (embers.length < EMBER_COUNT) spawnEmber();
+
+	for (let i = embers.length - 1; i >= 0; i--) {
+		const e = embers[i];
+		e.x += e.vx * SPEED;
+		e.y += e.vy * SPEED;
+		e.vx += (Math.random() - 0.5) * 0.15;
+		e.life -= 0.004;
+		if (e.life <= 0 || e.y < -20) {
+			embers.splice(i, 1);
+		}
+	}
+}
+
+function renderEmbers() {
+	context.save();
+	context.globalCompositeOperation = "lighter";
+	embers.forEach((e) => {
+		const a = Math.max(0, e.life) * 0.6;
+		const g = context.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.size);
+		g.addColorStop(0, `hsla(${e.hue}, 100%, 70%, ${a})`);
+		g.addColorStop(0.4, `hsla(${e.hue}, 100%, 50%, ${a * 0.6})`);
+		g.addColorStop(1, `hsla(${e.hue}, 100%, 40%, 0)`);
+		context.fillStyle = g;
+		context.beginPath();
+		context.arc(e.x, e.y, e.size, 0, Math.PI * 2);
+		context.fill();
+	});
+	context.restore();
+}
+
 function resize() {
 	scale = window.devicePixelRatio || 1;
 
@@ -98,14 +152,29 @@ function resize() {
 	stars.forEach(placeStar);
 }
 
+function trailFill() {
+	if (FIRE_TRAIL) return "rgba(5, 0, 0, 0.16)";
+	return getTheme() === "light" ? "rgba(254, 254, 254, 0.15)" : "rgba(10, 10, 10, 0.15)";
+}
+
 function step() {
-	context.clearRect(0, 0, width, height);
+	if (FIRE_TRAIL) {
+		context.globalCompositeOperation = "source-over";
+		context.fillStyle = trailFill();
+		context.fillRect(0, 0, width, height);
+	} else {
+		context.clearRect(0, 0, width, height);
+	}
+
 	update();
 	render();
+	renderEmbers();
 	requestAnimationFrame(step);
 }
 
 function update() {
+	time += 0.02;
+
 	velocity.tx *= SNOW_MODE ? 0.90 : 0.96;
 	velocity.ty *= SNOW_MODE ? 1 : 0.96;
 
@@ -113,8 +182,8 @@ function update() {
 	velocity.y += SNOW_MODE ? -velocity.y + 2.5 : (velocity.ty - velocity.y) * 0.8;
 
 	stars.forEach((star) => {
-		star.x += velocity.x * star.z;
-		star.y += velocity.y * star.z;
+		star.x += velocity.x * star.z * SPEED;
+		star.y += velocity.y * star.z * SPEED;
 		
 		// Parallax 
 		if (SNOW_MODE) {
@@ -133,26 +202,17 @@ function update() {
 			recycleStar(star);
 		}
 	});
+
+	updateEmbers();
 }
 
 function render() {
+	context.save();
+	if (FIRE_TRAIL) context.globalCompositeOperation = "lighter";
+
 	stars.forEach((star) => {
-		context.beginPath();
 		context.lineCap = "round";
 		context.lineWidth = (SNOW_MODE ? SNOW_SIZE : STAR_SIZE) * star.z * scale;
-
-		const theme = getTheme();
-		const color = ((t) => {
-			if (t === "light") {
-				return "0, 0, 0,";
-			} else if (t === "dark") {
-				return "255, 255, 255,";
-			}
-		})(theme);
-		context.strokeStyle = "rgba("+color+(0.5 + 0.5*star.alpha)+")";
-
-		context.beginPath();
-		context.moveTo(star.x, star.y);
 
 		let tailX = SNOW_MODE ? 0 : velocity.x * 2,
 			tailY = SNOW_MODE ? 0 : velocity.y * 2;
@@ -160,9 +220,27 @@ function render() {
 		if(Math.abs(tailX) < 0.1) tailX = 0.5;
 		if(Math.abs(tailY) < 0.1) tailY = 0.5;
 
+		const a = 0.5 + 0.5 * Math.sin(time + star.twinkle);
+
+		if (FIRE_TRAIL) {
+			const grad = context.createLinearGradient(star.x, star.y, star.x + tailX, star.y + tailY);
+			grad.addColorStop(0, `rgba(255, 255, 210, ${a})`);
+			grad.addColorStop(0.5, `rgba(255, 140, 0, ${a * 0.85})`);
+			grad.addColorStop(1, "rgba(255, 20, 0, 0)");
+			context.strokeStyle = grad;
+		} else {
+			const theme = getTheme();
+			const color = theme === "light" ? "0, 0, 0," : "255, 255, 255,";
+			context.strokeStyle = "rgba(" + color + a + ")";
+		}
+
+		context.beginPath();
+		context.moveTo(star.x, star.y);
 		context.lineTo(star.x + tailX, star.y + tailY);
 		context.stroke();
 	});
+
+	context.restore();
 }
 
 function movePointer(x, y) {
@@ -210,6 +288,10 @@ function onDeviceOrientation(event) {
 	}, 1000);
 }
 
+function setFireTrail(on) { FIRE_TRAIL = !!on; }
+function setFire(on) { FIRE = !!on; }
+function setSpeed(mult) { SPEED = mult; }
+
 
 function runCanvas(_canvas, _SNOW_MODE) {
 	SNOW_MODE = _SNOW_MODE;
@@ -229,4 +311,4 @@ function runCanvas(_canvas, _SNOW_MODE) {
 	logger.log("Started canvas!");
 }
 
-export {runCanvas};
+export {runCanvas, setFireTrail, setFire, setSpeed};

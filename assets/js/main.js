@@ -3,6 +3,7 @@ import { fontsLoaded, isTouchDevice } from "./modules/Utils.js";
 import { changeTheme } from "./modules/Theme.js";
 import { runCanvas } from "./modules/Background.js";
 import { startHandling } from "./modules/Cursor.js";
+import { initChaos, disableAll } from "./modules/Chaos.js";
 
 
 const fonts = ["VK Sans Display", "Ubuntu", "my-icons"];
@@ -47,5 +48,10 @@ window.onload = _ => {
 }
 
 if (canvas) runCanvas(canvas, date.getMonth() < 2 || date.getMonth() == 11);
+
+initChaos();
+
+const clownKill = document.querySelector("#clown-kill");
+if (clownKill) clownKill.addEventListener("click", () => { disableAll(); clownKill.remove(); });
 
 window.changeTheme = changeTheme;
