@@ -442,3 +442,19 @@ body.fx-snow::after { content: ""; position: fixed; inset: 0; pointer-events: no
 }
 #hints-panel li:last-child { border-bottom: none; }
 #hints-panel li b { font-family: 'VK Sans Display', sans-serif; }
+
+/* --- click egg animations --- */
+@keyframes footdance {
+	0%, 100% { transform: translateY(0) rotate(0); }
+	25% { transform: translateY(-12px) rotate(-8deg); }
+	75% { transform: translateY(-12px) rotate(8deg); }
+}
+footer.fx-dance { animation: footdance .6s ease-in-out infinite; }
+
+@keyframes runaway {
+	to { transform: translate(60vw, -60vh) rotate(720deg); opacity: 0; }
+}
+#clown-hints.fx-runaway { animation: runaway .6s ease-in forwards; }
+
+/* mobile: taps shouldn't select/zoom UI */
+body { touch-action: manipulation; }

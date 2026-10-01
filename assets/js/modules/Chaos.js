@@ -308,6 +308,78 @@ function onHash(hash, fn) {
 	return () => { if (location.hash === hash) fn(); };
 }
 
+// ---------------------------------------------------------------------------
+// Click / tap tracking (Pointer Events — works for mouse AND touch)
+// ---------------------------------------------------------------------------
+
+const TAPS = [];
+const CORNER_ORDER = ["TL", "TR", "BR", "BL"];
+let totalTaps = 0;
+let lastTap = null;
+let sameSpot = 0;
+let cornerSeq = 0;
+let holdTimer = null;
+
+function tapsWithin(ms) {
+	const now = Date.now();
+	return TAPS.filter((t) => now - t < ms).length;
+}
+
+function cornerAt(x, y) {
+	const m = 60;
+	if (x < m && y < m) return "TL";
+	if (x > innerWidth - m && y < m) return "TR";
+	if (x > innerWidth - m && y > innerHeight - m) return "BR";
+	if (x < m && y > innerHeight - m) return "BL";
+	return null;
+}
+
+function edgeAt(x, y) {
+	if (y < 20) return "top";
+	if (y > innerHeight - 20) return "bottom";
+	if (x < 20) return "left";
+	if (x > innerWidth - 20) return "right";
+	return null;
+}
+
+function trackTap(e) {
+	const x = e.clientX, y = e.clientY, now = Date.now();
+	totalTaps++;
+	TAPS.push(now);
+	while (TAPS.length && now - TAPS[0] > 5000) TAPS.shift();
+
+	if (lastTap && Math.abs(x - lastTap.x) < 20 && Math.abs(y - lastTap.y) < 20) sameSpot++;
+	else sameSpot = 1;
+
+	const c = cornerAt(x, y);
+	if (c) {
+		if (c === CORNER_ORDER[cornerSeq]) cornerSeq++;
+		else cornerSeq = (c === CORNER_ORDER[0]) ? 1 : 0;
+	} else cornerSeq = 0;
+
+	lastTap = { x, y, t: now, button: e.button, ctrl: e.ctrlKey, alt: e.altKey, shift: e.shiftKey, target: e.target, type: e.pointerType };
+}
+
+const tapHandlers = [];
+const holdHandlers = [];
+
+function onTap(fn) { tapHandlers.push(fn); }
+function onHold(fn) { holdHandlers.push(fn); }
+
+function tempClass(cls, ms = 2000) { addClass(cls); setTimeout(() => removeClass(cls), ms); }
+function toggleClass(cls) { body.classList.toggle(cls); }
+
+window.addEventListener("pointerdown", (e) => {
+	trackTap(e);
+	tapHandlers.forEach((fn) => { try { fn(e); } catch (err) {} });
+	clearTimeout(holdTimer);
+	holdTimer = setTimeout(() => {
+		holdHandlers.forEach((fn) => { try { fn(); } catch (err) {} });
+	}, 5000);
+});
+window.addEventListener("pointerup", () => clearTimeout(holdTimer));
+window.addEventListener("pointercancel", () => clearTimeout(holdTimer));
+
 const eggs = [
 	{ name: "Konami-код", hint: "Легендарный код из старых игр: стрелки и буквы B, A", bind: () => window.addEventListener("keydown", onKeySequence("ArrowUpArrowUpArrowDownArrowDownArrowLeftArrowRightArrowLeftArrowRightba", ultimate)) },
 	{ name: "Ник автора", hint: "Просто напечатай ник автора этого сайта", bind: () => window.addEventListener("keydown", onKeySequence("olejka", confettiBurst)) },
@@ -338,7 +410,39 @@ const eggs = [
 	{ name: "Правая кнопка", hint: "Кликни правой кнопкой мыши", bind: () => window.addEventListener("contextmenu", (e) => { e.preventDefault(); popup("Ага! 👀"); }) },
 	{ name: "Вайб", hint: "Включи вайб — добавь #vibe к адресу", bind: () => window.addEventListener("hashchange", onHash("#vibe", () => addClass("fx-vibe"))) },
 	{ name: "Бананы", hint: "Набери banana", bind: () => window.addEventListener("keydown", onKeySequence("banana", () => { for (let i = 0; i < 20; i++) setTimeout(() => spawnFalling("🍌", "faller"), i * 100); })) },
-	{ name: "Полный хаос", hint: "Добавь #chaos к адресу — и всё сразу", bind: () => window.addEventListener("hashchange", onHash("#chaos", enableAll)) }
+	{ name: "Полный хаос", hint: "Добавь #chaos к адресу — и всё сразу", bind: () => window.addEventListener("hashchange", onHash("#chaos", enableAll)) },
+
+	// ---- 30 click / tap eggs (mouse + mobile) ----
+	{ name: "5 тапов", hint: "Тапни в любом месте 5 раз подряд", bind: () => onTap(() => { if (totalTaps === 5) { tempClass("fx-rainbow", 3000); popup("Радуга! 🌈"); } }) },
+	{ name: "10 тапов", hint: "Тапни в любом месте 10 раз подряд", bind: () => onTap(() => { if (totalTaps === 10) confettiBurst(); }) },
+	{ name: "25 тапов", hint: "Тапни в любом месте 25 раз подряд", bind: () => onTap(() => { if (totalTaps === 25) popup("Клик-мастер 🖱️"); }) },
+	{ name: "50 тапов", hint: "Тапни в любом месте 50 раз подряд", bind: () => onTap(() => { if (totalTaps === 50) { tempClass("fx-invert", 2000); popup("Мир перевернулся! 🙃"); } }) },
+	{ name: "100 тапов", hint: "Тапни в любом месте 100 раз подряд", bind: () => onTap(() => { if (totalTaps === 100) { firework(); popup("Ты кликал 100 раз! 🎉"); } }) },
+	{ name: "3 быстрых тапа", hint: "Трижды быстро тапни (менее чем за полсекунды)", bind: () => onTap(() => { if (tapsWithin(500) >= 3) tempClass("fx-zoom", 1500); }) },
+	{ name: "5 быстрых тапов", hint: "Пять раз быстро тапни", bind: () => onTap(() => { if (tapsWithin(500) >= 5) { tempClass("fx-blackhole", 2000); popup("Чёрная дыра! 🕳️"); } }) },
+	{ name: "10 быстрых тапов", hint: "Десять раз очень быстро тапни", bind: () => onTap(() => { if (tapsWithin(500) >= 10) popup("Ультра-скорость! 🚀"); }) },
+	{ name: "Верхняя кромка", hint: "Тапни по самому верху экрана", bind: () => onTap((e) => { if (edgeAt(e.clientX, e.clientY) === "top") spawnFalling(pick(EMOTES), "faller"); }) },
+	{ name: "Нижняя кромка", hint: "Тапни по самому низу экрана", bind: () => onTap((e) => { if (edgeAt(e.clientX, e.clientY) === "bottom") { spawnFalling("🔥", "faller"); popup("Огонь! 🔥"); } }) },
+	{ name: "Левая кромка", hint: "Тапни по левому краю экрана", bind: () => onTap((e) => { if (edgeAt(e.clientX, e.clientY) === "left" && !document.getElementById("matrix")) effects.find(x => x.id === "matrix").on(); }) },
+	{ name: "Правая кромка", hint: "Тапни по правому краю экрана", bind: () => onTap((e) => { if (edgeAt(e.clientX, e.clientY) === "right") spawnFalling(pick(EMOTES), "faller"); }) },
+	{ name: "Все 4 угла", hint: "Тапни по углам по порядку: вверх-лево → вверх-право → вниз-право → вниз-лево", bind: () => onTap(() => { if (cornerSeq === 4) { cornerSeq = 0; popup("Все углы! 🤡"); enableAll(); } }) },
+	{ name: "Средняя кнопка", hint: "Нажми среднюю кнопку мыши (колесо)", bind: () => onTap((e) => { if (e.button === 1) toggleClass("fx-gravity"); }) },
+	{ name: "5 ПКМ", hint: "Пять раз кликни правой кнопкой мыши", bind: () => { let n = 0; onTap((e) => { if (e.button === 2) { n++; if (n >= 5) { n = 0; tempClass("fx-neon", 2000); } } }); } },
+	{ name: "Ctrl+тап", hint: "Зажми Ctrl и тапни", bind: () => onTap((e) => { if (e.ctrlKey) toggleClass("fx-invert"); }) },
+	{ name: "Alt+тап", hint: "Зажми Alt и тапни", bind: () => onTap((e) => { if (e.altKey) toggleClass("fx-mirror"); }) },
+	{ name: "Shift+двойной тап", hint: "Зажми Shift и быстро тапни дважды", bind: () => onTap((e) => { if (e.shiftKey && tapsWithin(300) >= 2) tempClass("fx-strobe", 1500); }) },
+	{ name: "Танец футера", hint: "Дважды быстро тапни по копирайту внизу", bind: () => { let last = 0; onTap((e) => { if (!e.target.closest("footer")) return; const now = Date.now(); if (now - last < 300) { const f = document.querySelector("footer"); f.classList.add("fx-dance"); setTimeout(() => f.classList.remove("fx-dance"), 2000); last = 0; } else last = now; }); } },
+	{ name: "Тройной тап по имени", hint: "Трижды быстро тапни по заголовку", bind: () => { let last = 0, cnt = 0; onTap((e) => { if (!e.target.closest("main h1")) { cnt = 0; return; } const now = Date.now(); cnt = (now - last < 400) ? cnt + 1 : 1; last = now; if (cnt >= 3) { cnt = 0; effects.find(x => x.id === "letters-fly").on(); } }); } },
+	{ name: "Первая буква", hint: "Тапни по первой букве «O» заголовка", bind: () => onTap((e) => { if (!h1) return; const r = h1.getBoundingClientRect(); if (e.clientY >= r.top && e.clientY <= r.bottom && e.clientX >= r.left && e.clientX <= r.left + 40) { h1.classList.add("fx-o"); setTimeout(() => h1.classList.remove("fx-o"), 1600); popup("O! 🅾️"); } }) },
+	{ name: "7 тапов по иконке", hint: "Семь раз тапни по одной и той же иконке соцсети", bind: () => onTap((e) => { const a = e.target.closest(".links a"); if (!a) return; clickCounts[a] = (clickCounts[a] || 0) + 1; if (clickCounts[a] >= 7) { clickCounts[a] = 0; a.classList.add("fx-flyaway"); } }) },
+	{ name: "Нетерпение", hint: "Тапни 10 раз в одну и ту же точку", bind: () => onTap(() => { if (sameSpot >= 10) { sameSpot = 0; popup("Ты нетерпелив 😤"); } }) },
+	{ name: "Просыпайся", hint: "Дождись, пока звёзды «заснут» (30с без действий), и тапни", bind: () => onTap(() => { if (body.classList.contains("fx-sleepy")) { removeClass("fx-sleepy"); popup("Просыпайся! ⏰"); } }) },
+	{ name: "Путешествие во времени", hint: "Пять раз тапни по футеру", bind: () => { let n = 0; onTap((e) => { if (e.target.closest("footer")) { n++; if (n >= 5) { n = 0; popup("Путешествие во времени ⏳"); } } }); } },
+	{ name: "Все иконки", hint: "Тапни по каждой иконке соцсети по одному разу", bind: () => { const seen = new Set(); onTap((e) => { const a = e.target.closest(".links a"); if (!a) return; seen.add(a); const all = document.querySelectorAll(".links a").length; if (all > 0 && seen.size >= all) { seen.clear(); confettiBurst(); popup("Все иконки собраны! 🏆"); } }); } },
+	{ name: "Долгое нажатие 5с", hint: "Зажми и удерживай палец/кнопку 5 секунд", bind: () => onHold(() => { tempClass("fx-invert", 2500); popup("Мега-переворот! 🙃"); }) },
+	{ name: "Центр экрана", hint: "Тапни точно в центр экрана", bind: () => onTap((e) => { if (Math.abs(e.clientX - innerWidth / 2) < 50 && Math.abs(e.clientY - innerHeight / 2) < 50) popup("Ты нашёл центр! 🎯"); }) },
+	{ name: "Убегающая кнопка", hint: "Трижды тапни по кнопке подсказок 🔍", bind: () => { let n = 0; onTap((e) => { if (e.target.closest("#clown-hints")) { n++; if (n >= 3) { n = 0; const b = document.querySelector("#clown-hints"); b.classList.add("fx-runaway"); } } }); } },
+	{ name: "Взрыв конфетти", hint: "Тапни по падающему эмодзи или конфетти", bind: () => onTap((e) => { document.querySelectorAll(".faller, .faller-confetti").forEach((el) => { const r = el.getBoundingClientRect(); if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) { el.style.transform = "scale(3)"; el.style.opacity = "0"; el.style.transition = ".2s"; setTimeout(() => el.remove(), 200); } }); }) }
 ];
 
 // --- egg helpers ---
@@ -359,7 +463,10 @@ function idleTimer() {
 	if (idleTimerSet) return; idleTimerSet = true;
 	let t;
 	const reset = () => { clearTimeout(t); t = setTimeout(() => addClass("fx-sleepy"), 30000); removeClass("fx-sleepy"); };
-	window.addEventListener("mousemove", reset); window.addEventListener("keydown", reset);
+	window.addEventListener("mousemove", reset);
+	window.addEventListener("keydown", reset);
+	window.addEventListener("pointerdown", reset);
+	window.addEventListener("touchstart", reset);
 	reset();
 }
 
