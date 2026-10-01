@@ -416,7 +416,7 @@ const eggs = [
 	{ name: "5 тапов", hint: "Тапни в любом месте 5 раз подряд", bind: () => onTap(() => { if (totalTaps === 5) { tempClass("fx-rainbow", 3000); popup("Радуга! 🌈"); } }) },
 	{ name: "10 тапов", hint: "Тапни в любом месте 10 раз подряд", bind: () => onTap(() => { if (totalTaps === 10) confettiBurst(); }) },
 	{ name: "25 тапов", hint: "Тапни в любом месте 25 раз подряд", bind: () => onTap(() => { if (totalTaps === 25) popup("Клик-мастер 🖱️"); }) },
-	{ name: "50 тапов", hint: "Тапни в любом месте 50 раз подряд", bind: () => onTap(() => { if (totalTaps === 50) { tempClass("fx-invert", 2000); popup("Мир перевернулся! 🙃"); } }) },
+	{ name: "50 тапов", hint: "Тапни в любом месте 50 раз подряд", bind: () => onTap(() => { if (totalTaps === 50) { tempClass("fx-neon", 2000); popup("Клик-машина! 🖱️"); } }) },
 	{ name: "100 тапов", hint: "Тапни в любом месте 100 раз подряд", bind: () => onTap(() => { if (totalTaps === 100) { firework(); popup("Ты кликал 100 раз! 🎉"); } }) },
 	{ name: "3 быстрых тапа", hint: "Трижды быстро тапни (менее чем за полсекунды)", bind: () => onTap(() => { if (tapsWithin(500) >= 3) tempClass("fx-zoom", 1500); }) },
 	{ name: "5 быстрых тапов", hint: "Пять раз быстро тапни", bind: () => onTap(() => { if (tapsWithin(500) >= 5) { tempClass("fx-blackhole", 2000); popup("Чёрная дыра! 🕳️"); } }) },
@@ -428,7 +428,7 @@ const eggs = [
 	{ name: "Все 4 угла", hint: "Тапни по углам по порядку: вверх-лево → вверх-право → вниз-право → вниз-лево", bind: () => onTap(() => { if (cornerSeq === 4) { cornerSeq = 0; popup("Все углы! 🤡"); enableAll(); } }) },
 	{ name: "Средняя кнопка", hint: "Нажми среднюю кнопку мыши (колесо)", bind: () => onTap((e) => { if (e.button === 1) toggleClass("fx-gravity"); }) },
 	{ name: "5 ПКМ", hint: "Пять раз кликни правой кнопкой мыши", bind: () => { let n = 0; onTap((e) => { if (e.button === 2) { n++; if (n >= 5) { n = 0; tempClass("fx-neon", 2000); } } }); } },
-	{ name: "Ctrl+тап", hint: "Зажми Ctrl и тапни", bind: () => onTap((e) => { if (e.ctrlKey) toggleClass("fx-invert"); }) },
+	{ name: "Ctrl+тап", hint: "Зажми Ctrl и тапни", bind: () => onTap((e) => { if (e.ctrlKey) toggleClass("fx-rainbow"); }) },
 	{ name: "Alt+тап", hint: "Зажми Alt и тапни", bind: () => onTap((e) => { if (e.altKey) toggleClass("fx-mirror"); }) },
 	{ name: "Shift+двойной тап", hint: "Зажми Shift и быстро тапни дважды", bind: () => onTap((e) => { if (e.shiftKey && tapsWithin(300) >= 2) tempClass("fx-strobe", 1500); }) },
 	{ name: "Танец футера", hint: "Дважды быстро тапни по копирайту внизу", bind: () => { let last = 0; onTap((e) => { if (!e.target.closest("footer")) return; const now = Date.now(); if (now - last < 300) { const f = document.querySelector("footer"); f.classList.add("fx-dance"); setTimeout(() => f.classList.remove("fx-dance"), 2000); last = 0; } else last = now; }); } },
@@ -439,7 +439,7 @@ const eggs = [
 	{ name: "Просыпайся", hint: "Дождись, пока звёзды «заснут» (30с без действий), и тапни", bind: () => onTap(() => { if (body.classList.contains("fx-sleepy")) { removeClass("fx-sleepy"); popup("Просыпайся! ⏰"); } }) },
 	{ name: "Путешествие во времени", hint: "Пять раз тапни по футеру", bind: () => { let n = 0; onTap((e) => { if (e.target.closest("footer")) { n++; if (n >= 5) { n = 0; popup("Путешествие во времени ⏳"); } } }); } },
 	{ name: "Все иконки", hint: "Тапни по каждой иконке соцсети по одному разу", bind: () => { const seen = new Set(); onTap((e) => { const a = e.target.closest(".links a"); if (!a) return; seen.add(a); const all = document.querySelectorAll(".links a").length; if (all > 0 && seen.size >= all) { seen.clear(); confettiBurst(); popup("Все иконки собраны! 🏆"); } }); } },
-	{ name: "Долгое нажатие 5с", hint: "Зажми и удерживай палец/кнопку 5 секунд", bind: () => onHold(() => { tempClass("fx-invert", 2500); popup("Мега-переворот! 🙃"); }) },
+	{ name: "Долгое нажатие 5с", hint: "Зажми и удерживай палец/кнопку 5 секунд", bind: () => onHold(() => { tempClass("fx-shake", 2500); popup("Мега-тряска! 💥"); }) },
 	{ name: "Центр экрана", hint: "Тапни точно в центр экрана", bind: () => onTap((e) => { if (Math.abs(e.clientX - innerWidth / 2) < 50 && Math.abs(e.clientY - innerHeight / 2) < 50) popup("Ты нашёл центр! 🎯"); }) },
 	{ name: "Убегающая кнопка", hint: "Трижды тапни по кнопке подсказок 🔍", bind: () => { let n = 0; onTap((e) => { if (e.target.closest("#clown-hints")) { n++; if (n >= 3) { n = 0; const b = document.querySelector("#clown-hints"); b.classList.add("fx-runaway"); } } }); } },
 	{ name: "Взрыв конфетти", hint: "Тапни по падающему эмодзи или конфетти", bind: () => onTap((e) => { document.querySelectorAll(".faller, .faller-confetti").forEach((el) => { const r = el.getBoundingClientRect(); if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) { el.style.transform = "scale(3)"; el.style.opacity = "0"; el.style.transition = ".2s"; setTimeout(() => el.remove(), 200); } }); }) }
@@ -495,6 +495,57 @@ function disableAll() {
 
 function toggle() { on ? disableAll() : enableAll(); return on; }
 
+const EGG_CATS = {
+	"Konami-код": "keys",
+	"Ник автора": "keys",
+	"Пропавшая страница": "keys",
+	"Фейерверк": "keys",
+	"Приветствие": "keys",
+	"Смех": "keys",
+	"UwU": "keys",
+	"Бананы": "keys",
+	"Консоль: clown()": "console",
+	"Консоль: destroy()": "console",
+	"Копирование": "other",
+	"Лень": "other",
+	"Вечеринка": "url",
+	"Огонь в адресе": "url",
+	"Секрет": "url",
+	"Почти Konami": "url",
+	"Рик": "url",
+	"Снег": "url",
+	"Матрица": "url",
+	"Единорог": "url",
+	"Вайб": "url",
+	"Полный хаос": "url"
+};
+
+const CAT_ORDER = [
+	{ id: "clicks", label: "👆 Клики и тапы" },
+	{ id: "keys", label: "⌨️ Клавиши" },
+	{ id: "url", label: "🔗 URL-хэши" },
+	{ id: "console", label: "🖥️ Консоль" },
+	{ id: "other", label: "✨ Прочее" }
+];
+
+function catOf(egg) { return EGG_CATS[egg.name] || "clicks"; }
+
+function buildHintsHTML() {
+	const groups = {};
+	eggs.forEach((e) => { const c = catOf(e); (groups[c] = groups[c] || []).push(e); });
+
+	let html = `<div class="hints-head">Пасхалки 🔍 <span>${eggs.length} штук</span><button id="hints-close">✕</button></div>`;
+	html += `<input id="hints-search" type="text" placeholder="Поиск по пасхалкам…" autocomplete="off">`;
+	CAT_ORDER.forEach((cat) => {
+		const list = groups[cat.id] || [];
+		if (!list.length) return;
+		html += `<details class="hints-group" open><summary>${cat.label} <span class="cnt">${list.length}</span></summary><ul>`;
+		html += list.map((e) => `<li><b>${e.name}</b> — ${e.hint}</li>`).join("");
+		html += `</ul></details>`;
+	});
+	return html;
+}
+
 function toggleHints() {
 	let panel = document.getElementById("hints-panel");
 	if (panel) { panel.classList.toggle("open"); return; }
@@ -502,11 +553,16 @@ function toggleHints() {
 	panel = document.createElement("div");
 	panel.id = "hints-panel";
 	panel.className = "open";
-	panel.innerHTML =
-		`<div class="hints-head">Пасхалки 🔍 <span>${eggs.length} штук</span><button id="hints-close">✕</button></div>` +
-		`<ul>` + eggs.map((e) => `<li><b>${e.name}</b> — ${e.hint}</li>`).join("") + `</ul>`;
+	panel.innerHTML = buildHintsHTML();
 	body.appendChild(panel);
 	panel.querySelector("#hints-close").addEventListener("click", () => panel.classList.remove("open"));
+	panel.querySelector("#hints-search").addEventListener("input", (e) => {
+		const q = e.target.value.trim().toLowerCase();
+		panel.querySelectorAll("li").forEach((li) => {
+			li.style.display = (!q || li.textContent.toLowerCase().includes(q)) ? "" : "none";
+		});
+		panel.querySelectorAll("details").forEach((d) => { d.open = true; });
+	});
 }
 
 function initHintsButton() {
